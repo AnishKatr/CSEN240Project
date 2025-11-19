@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import os
 
-data_path = "./Term-Project/Knee_Osteoarthritis_Classification"
+data_path = "."
 
 categories = ["Normal","Osteopenia", "Osteoporosis"]
 
@@ -222,7 +222,7 @@ cnn_model = create_xception_model(input_shape, num_classes=3, learning_rate=1e-4
 # %%
 history = cnn_model.fit( train_gen_new,
                          validation_data=valid_gen_new,
-                         epochs=30,
+                         epochs=32,
                          callbacks=[early_stopping],
                          verbose=1)
 

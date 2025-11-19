@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem-per-cpu=4G
 #SBATCH --gres=gpu:1
-#SBATCH --time=02:00:00
+#SBATCH --time=10:00:00
 #SBATCH --mail-user=akatragadda@scu.edu
 #SBATCH --mail-type=END
 

@@ -89,21 +89,26 @@ plt.pause(5)
 plt.close()
 
 # %%
-# Encode labels as integers
+# Encode labels as integers, then cast to string for Keras on WAVE
 from sklearn.preprocessing import LabelEncoder
 
 label_encoder = LabelEncoder()
 df["category_encoded"] = label_encoder.fit_transform(df["label"])
+print("Encoded label distribution (int):")
+print(df["category_encoded"].value_counts())
+
+# Keras on this cluster expects string labels when class_mode="sparse"
+df["category_encoded"] = df["category_encoded"].astype(str)
 df = df[["image_path", "category_encoded"]]
 
-print("Encoded label distribution:")
+print("Encoded label distribution (str):")
 print(df["category_encoded"].value_counts())
 
 # %%
 # Train / val / test split on the original balanced dataframe (no oversampling)
 from sklearn.model_selection import train_test_split
 
-train_df_new, temp_df_new = train_test_split(
+train_df_new, temp_df_new = train_split = train_test_split(
     df,
     train_size=0.8,
     shuffle=True,

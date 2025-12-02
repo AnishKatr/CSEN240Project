@@ -22,7 +22,7 @@ from tensorflow.keras.optimizers import Adam
 # Assumes you unzipped training.zip to 'train' and validation.zip to 'valid'
 DATA_PATH = "."  
 TRAIN_DIR = os.path.join(DATA_PATH, "train")
-VALID_DIR = os.path.join(DATA_PATH, "val")
+VALID_DIR = os.path.join(DATA_PATH, "test")
 
 IMG_SIZE = 320
 BATCH_SIZE = 32

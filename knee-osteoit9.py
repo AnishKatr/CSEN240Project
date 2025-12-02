@@ -180,7 +180,7 @@ loss_fn = tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1)
 print("\n--- PHASE 1: Training Head ---")
 model.compile(optimizer=Adam(learning_rate=1e-3), loss=loss_fn, metrics=["accuracy"])
 model.fit(
-    train_gen, validation_data=valid_gen, epochs=10, 
+    train_gen, validation_data=valid_gen, epochs=20, 
     class_weight=class_weights, 
     callbacks=[EarlyStopping(patience=5, restore_best_weights=True), ReduceLROnPlateau(factor=0.5, patience=2)]
 )
@@ -199,12 +199,12 @@ for layer in base_model.layers:
 model.compile(optimizer=Adam(learning_rate=1e-5), loss=loss_fn, metrics=["accuracy"])
 
 callbacks_ft = [
-    EarlyStopping(monitor="val_loss", patience=15, restore_best_weights=True, verbose=1),
-    ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=5, verbose=1),
+    EarlyStopping(monitor="val_loss", patience=20, restore_best_weights=True, verbose=1),
+    ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=6, verbose=1),
     ModelCheckpoint(MODEL_PATH, monitor="val_loss", save_best_only=True, verbose=1)
 ]
 
-model.fit(train_gen, validation_data=valid_gen, epochs=40, class_weight=class_weights, callbacks=callbacks_ft)
+model.fit(train_gen, validation_data=valid_gen, epochs=100, class_weight=class_weights, callbacks=callbacks_ft)
 
 # --- 8. EVALUATION & TTA ---
 print("\n--- EVALUATION (Standard) ---")

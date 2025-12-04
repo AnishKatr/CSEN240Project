@@ -18,8 +18,8 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCh
 from tensorflow.keras.applications import DenseNet121
 from tensorflow.keras.optimizers import Adam
 
-# --- CONFIGURATION ---
-# Assumes you unzipped training.zip to 'train' and validation.zip to 'valid'
+# CONFIGURATION
+# unzipped directory
 DATA_PATH = "."  
 TRAIN_DIR = os.path.join(DATA_PATH, "train")
 VALID_DIR = os.path.join(DATA_PATH, "test")
@@ -28,7 +28,7 @@ IMG_SIZE = 320
 BATCH_SIZE = 32
 MODEL_PATH = "final_retrained_model.keras"
 
-# --- GPU SETUP ---
+#GPU CONFIG
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
     try:
@@ -37,7 +37,7 @@ if gpus:
     except RuntimeError as e:
         print(e)
 
-# --- 1. DATA LOADING ---
+# LOAD DATA
 def load_data(directory):
     paths = []
     labels = []
@@ -65,7 +65,7 @@ if len(train_df) == 0 or len(valid_df) == 0:
     print("CRITICAL ERROR: Data missing. Ensure 'train' and 'valid' folders exist.")
     exit(1)
 
-# --- 2. CLASS WEIGHTS (From Training Data) ---
+#CLASS WEIGHTS (From Training Data)
 le = LabelEncoder()
 train_labels_encoded = le.fit_transform(train_df['label'])
 class_weights_arr = class_weight.compute_class_weight(
@@ -74,7 +74,7 @@ class_weights_arr = class_weight.compute_class_weight(
 class_weights = dict(enumerate(class_weights_arr))
 print(f"Class Weights applied: {class_weights}")
 
-# --- 3. PREPROCESSING (CLAHE) ---
+# PREPROCESSING (CLAHE)
 def apply_clahe(img):
     img = img.astype(np.uint8)
     lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
@@ -85,7 +85,7 @@ def apply_clahe(img):
     final = cv2.cvtColor(limg, cv2.COLOR_LAB2RGB)
     return final.astype(np.float32) / 255.0
 
-# --- 4. GENERATORS ---
+#GENERATORS
 train_datagen = ImageDataGenerator(
     preprocessing_function=apply_clahe,
     rotation_range=20, width_shift_range=0.15, height_shift_range=0.15,
@@ -106,7 +106,7 @@ valid_gen = valid_datagen.flow_from_dataframe(
     class_mode="categorical", shuffle=False 
 )
 
-# --- 5. ARCHITECTURE (CBAM + DenseNet) ---
+#CBAM + DenseNet121
 def cbam_block(input_feature, ratio=8):
     channel = input_feature.shape[-1]
     
@@ -143,7 +143,7 @@ def build_model():
     base_model.trainable = False
     
     x = base_model.output
-    x = cbam_block(x) # Add Attention
+    x = cbam_block(x)
     x = GlobalAveragePooling2D()(x)
     x = BatchNormalization()(x)
     x = Dense(512, activation="relu")(x)
@@ -156,7 +156,7 @@ def build_model():
 model, base_model = build_model()
 loss_fn = tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1)
 
-# --- 6. PHASE 1: TRAIN HEAD ---
+# TRAIN HEAD
 print("\n--- PHASE 1: Training Head (15 Epochs) ---")
 model.compile(optimizer=Adam(learning_rate=1e-3), loss=loss_fn, metrics=["accuracy"])
 
@@ -173,11 +173,11 @@ model.fit(
     callbacks=callbacks_phase1
 )
 
-# --- 7. PHASE 2: FINE TUNING ---
+#PHASE 2: FINE TUNING
 print("\n--- PHASE 2: Fine Tuning (Up to 50 Epochs) ---")
 base_model.trainable = True
 total_layers = len(base_model.layers)
-# Unfreeze top 60% of the model
+# Unfreeze 
 fine_tune_at = int(total_layers * 0.40) 
 
 for layer in base_model.layers[:fine_tune_at]:
@@ -204,8 +204,8 @@ model.fit(
     callbacks=callbacks_phase2
 )
 
-# --- 8. FINAL EVALUATION (TTA) ---
-print("\n--- FINAL EVALUATION (TTA) ON VALIDATION SET ---")
+# FINAL EVALUATION
+print("\n--- FINAL EVALUATION (TTA) ---")
 best_model = load_model(MODEL_PATH)
 
 tta_steps = 5

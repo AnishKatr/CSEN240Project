@@ -69,7 +69,7 @@ if len(train_df) == 0 or len(valid_df) == 0:
     print("CRITICAL ERROR: Data missing. Ensure 'train' and 'valid' folders exist.")
     exit(1)
 
-#CLASS WEIGHTS (From Training Data)
+#CLASS WEIGHTS
 le = LabelEncoder()
 train_labels_encoded = le.fit_transform(train_df['label'])
 class_weights_arr = class_weight.compute_class_weight(

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+#Anish Katragadda & Shravan
+#Final Model for CSEN240 F25
+
+
 
 import os
 import cv2
@@ -173,7 +177,7 @@ model.fit(
     callbacks=callbacks_phase1
 )
 
-#PHASE 2: FINE TUNING
+#FINE TUNING
 print("\n--- PHASE 2: Fine Tuning (Up to 50 Epochs) ---")
 base_model.trainable = True
 total_layers = len(base_model.layers)
